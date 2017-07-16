@@ -1,0 +1,29 @@
+{
+    "name": "craigchilds94/plaid-php",
+    "description": "Unofficial PHP SDK for Plaid",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Craig Childs",
+            "email": "childscraig17@gmail.com"
+        }
+    ],
+    "require": {
+        "mashape/unirest-php": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Plaid\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.2",
+        "vlucas/phpdotenv": "^2.4"
+    }
+}
