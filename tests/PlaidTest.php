@@ -25,37 +25,37 @@ final class PlaidTest extends TestCase
     {
         $this->assertInstanceOf(
             Plaid::class,
-            new Plaid($_ENV['PLAID_CLIENT_ID'], $_ENV['PLAID_SECRET'], $_ENV['PLAID_ENV'])
+            new Plaid(getenv('PLAID_CLIENT_ID'), getenv('PLAID_SECRET'), getenv('PLAID_ENV'))
         );
     }
 
     public function testCanBeCreatedAsSandbox(): void
     {
-        $plaid = new Plaid($_ENV['PLAID_CLIENT_ID'], $_ENV['PLAID_SECRET'], 'sandbox');
+        $plaid = new Plaid(getenv('PLAID_CLIENT_ID'), getenv('PLAID_SECRET'), 'sandbox');
         $this->assertEquals($plaid->isSandbox(), true);
     }
 
     public function testCanBeCreatedAsDevelopment(): void
     {
-        $plaid = new Plaid($_ENV['PLAID_CLIENT_ID'], $_ENV['PLAID_SECRET'], 'development');
+        $plaid = new Plaid(getenv('PLAID_CLIENT_ID'), getenv('PLAID_SECRET'), 'development');
         $this->assertEquals($plaid->isDevelopment(), true);
     }
 
     public function testCanBeCreatedAsProduction(): void
     {
-        $plaid = new Plaid($_ENV['PLAID_CLIENT_ID'], $_ENV['PLAID_SECRET'], 'production');
+        $plaid = new Plaid(getenv('PLAID_CLIENT_ID'), getenv('PLAID_SECRET'), 'production');
         $this->assertEquals($plaid->isProduction(), true);
     }
 
     public function testThrowsExceptionWhenCreatedWithInvalidEnvironment(): void
     {
         $this->expectException(PlaidException::class);
-        $plaid = new Plaid($_ENV['PLAID_CLIENT_ID'], $_ENV['PLAID_SECRET'], 'gibberish');
+        $plaid = new Plaid(getenv('PLAID_CLIENT_ID'), getenv('PLAID_SECRET'), 'gibberish');
     }
 
     public function testFetchingStripeBankAccount(): void
     {
-        $plaid = new Plaid($_ENV['PLAID_CLIENT_ID'], $_ENV['PLAID_SECRET'], $_ENV['PLAID_ENV']);
+        $plaid = new Plaid(getenv('PLAID_CLIENT_ID'), getenv('PLAID_SECRET'), getenv('PLAID_ENV'));
 
         $response = \Unirest\Request::post($plaid->getHost().'link/item/create', [
             'Content-Type' => 'application/json',
@@ -67,7 +67,7 @@ final class PlaidTest extends TestCase
             ],
             'initial_products' => ['auth'],
             'institution_id'   => 'ins_1',
-            'public_key'       => $_ENV['PLAID_PUBLIC_ID'],
+            'public_key'       => getenv('PLAID_PUBLIC_ID'),
         ]));
         
         $this->assertTrue(isset($response->body->accounts[0]->account_id), 'Checking for account id in response');
@@ -85,7 +85,7 @@ final class PlaidTest extends TestCase
     {
         $this->expectException(PlaidException::class);
 
-        $plaid = new Plaid($_ENV['PLAID_CLIENT_ID'], $_ENV['PLAID_SECRET'], $_ENV['PLAID_ENV']);
+        $plaid = new Plaid(getenv('PLAID_CLIENT_ID'), getenv('PLAID_SECRET'), getenv('PLAID_ENV'));
         $plaid->getStripeBankAccount('gibberishtoken', 'gibberishaccountid');
     }
 }
