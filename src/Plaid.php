@@ -24,18 +24,23 @@ class Plaid
     private $secret;
 
     /**
-     * Are we using the test environment?
+     * What environment are we in?
      *
-     * @var boolean
+     * @var string
      */
-    private $testing;
+    private $environment;
 
     /**
      * The Plaid API hostname
      *
      * @var  string
      */
-    private $host = 'https://api.plaid.com/';
+    private $host = 'https://%s.plaid.com/';
+
+    /**
+     * The environments that are available to use.
+     */
+    const ENVIRONMENTS = ['sandbox', 'development', 'production'];
 
     /**
      * Construct the Plaid helper instance with our
@@ -43,18 +48,16 @@ class Plaid
      *
      * @param string $client_id
      * @param boolean $secret
-     * @param string $testing
+     * @param string $environment
      */
-    public function __construct($client_id, $secret, $testing = false)
+    public function __construct($client_id, $secret, $environment = 'sandbox')
     {
         $this->client_id = $client_id;
         $this->secret = $secret;
 
-        $this->testing = $testing;
+        $this->environment = $environment;
 
-        if ($this->testing) {
-            $this->host = 'https://sandbox.plaid.com/';
-        }
+        $this->generateEnvironmentHost();
 
         \Unirest\Request::defaultHeaders([
             'Content-Type' => 'application/json',
@@ -87,6 +90,57 @@ class Plaid
     }
 
     /**
+     * Are we in a specific environment?
+     *
+     * @param  string  $environment
+     * @return boolean
+     */
+    public function isEnvironment($environment)
+    {
+        return $this->environment == $environment;
+    }
+
+    /**
+     * Are we in the sandbox env?
+     *
+     * @return boolean
+     */
+    public function isSandbox()
+    {
+        return $this->isEnvironment('sandbox');
+    }
+
+    /**
+     * Are we in the development env?
+     *
+     * @return boolean
+     */
+    public function isDevelopment()
+    {
+        return $this->isEnvironment('development');
+    }
+
+    /**
+     * Are we in the production env?
+     *
+     * @return boolean
+     */
+    public function isProduction()
+    {
+        return $this->isEnvironment('production');
+    }
+
+    /**
+     * Grab the host we're using
+     * 
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->host;
+    }
+
+    /**
      * Make a request to an endpoint.
      *
      * @param  string $method
@@ -112,6 +166,7 @@ class Plaid
      *
      * @param  string $public_token
      * @return string
+     * @throws PlaidException
      */
     protected function getAccessToken($public_token)
     {
@@ -124,6 +179,23 @@ class Plaid
         }
 
         return $response->body->access_token;
+    }
+
+    /**
+     * Make our host url from our environment key. This will
+     * throw a PlaidException if the environment which has been
+     * passed into the instance is not valid.
+     *
+     * @return void
+     * @throws PlaidException
+     */
+    protected function generateEnvironmentHost()
+    {
+        if (!in_array($this->environment, self::ENVIRONMENTS)) {
+            throw new PlaidException(null, 'The environment you are trying to use is not valid: ' . $this->environment);
+        }
+
+        $this->host = sprintf($this->host, $this->environment);
     }
 
     /**
@@ -148,15 +220,5 @@ class Plaid
     private function buildUrl($endpoint)
     {
         return $this->host . $endpoint;
-    }
-
-    /**
-     * Are we accessing the sandbox?
-     * 
-     * @return boolean
-     */
-    public function isSandbox()
-    {
-        return $this->testing;
     }
 }
