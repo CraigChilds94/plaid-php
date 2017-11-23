@@ -1,6 +1,7 @@
 {
     "name": "craigchilds94/plaid-php",
     "description": "Un-Official PHP SDK for Plaid",
+    "version": "1.0.0",
     "type": "library",
     "license": "MIT",
     "authors": [
